@@ -1,0 +1,7 @@
+name = "kcsc-mcp"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# 비밀값(배포 후 wrangler secret put 으로 등록, 파일에 적지 않기)
+#   KCSC_KEY   : KCSC OpenAPI 인증키
+#   PATH_TOKEN : 접속 주소에 붙일 임의의 긴 문자열 (예: 32자 이상 랜덤)
