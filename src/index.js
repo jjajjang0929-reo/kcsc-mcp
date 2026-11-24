@@ -97,7 +97,20 @@ async function getCode(args, env) {
   if (!doc || (doc.message && !doc.list)) return text(`조회 실패: ${doc?.message || "결과 없음"}`, true);
   const max = Math.min(Math.max(parseInt(args.maxChars) || 12000, 500), 60000);
   const sec = args.section ? String(args.section).toLowerCase() : null;
-  const items = (doc.list || []).filter((it) => !sec || String(it.title || "").toLowerCase().includes(sec) || String(it.label || "").toLowerCase().includes(sec));
+  // section 이 일치하는 목차는 그 하위 목차(level 이 더 깊은 항목)까지 함께 포함한다
+  const all = doc.list || [];
+  let items = all;
+  if (sec) {
+    items = [];
+    let base = null;
+    for (const it of all) {
+      const lv = it.level || 1;
+      const hit = String(it.title || "").toLowerCase().includes(sec) || String(it.label || "").toLowerCase().includes(sec);
+      if (base !== null && lv <= base) base = null;
+      if (hit && base === null) base = lv;
+      if (base !== null) items.push(it);
+    }
+  }
   let body = items.map((it) => `${"#".repeat(Math.min(Math.max(it.level || 1, 1), 5))} ${it.title}\n${stripHtml(it.contents)}`).join("\n\n");
   let cut = "";
   if (body.length > max) { body = body.slice(0, max); cut = `\n\n[… ${max}자에서 잘림. section 또는 maxChars 로 범위를 조정하세요]`; }
